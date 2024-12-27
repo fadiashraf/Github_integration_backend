@@ -1,90 +1,89 @@
 import mongoose from "mongoose";
+import {
+    getSortObject,
+    getGlobalSearchFilter,
+    getColumnFilters,
+    combineFilters,
+    mapFilter,
+} from "../helpers/gridMongoose.js";
+
+
 
 export class BaseRepository {
-
     constructor(model) {
         this.model = model;
     }
 
     findOne (query) {
-        return this.model.findOne(query)
+        return this.model.findOne(query);
     }
 
-    async findAll (query = {}, options = {}) {
+    findAll (query = {}, options = {}) {
         const { skip = 0, limit = 50, sort = {} } = options;
         return this.model.find(query).skip(skip).limit(limit).sort(sort);
     }
-    async findById (id, projection = {}, options = {}) {
+
+    findById (id, projection = {}, options = {}) {
         return this.model.findById(id, projection, options);
     }
 
-    async create (data) {
-        const entity = new this.model(data);
-        return entity.save();
-    }
-    async createMany (data) {
-        return this.model.insertMany(data)
+    create (data) {
+        return new this.model(data).save();
     }
 
-    async updateOne (query, data, options = { upsert: false }) {
+    createMany (data) {
+        return this.model.insertMany(data);
+    }
+
+    updateOne (query, data, options = { upsert: false }) {
         return this.model.findOneAndUpdate(query, data, { new: true, ...options });
     }
 
-
-    async findByIdAndUpdate (id, data, options = { upsert: false }) {
+    findByIdAndUpdate (id, data, options = { upsert: false }) {
         return this.model.findByIdAndUpdate(id, data, { new: true, ...options });
     }
 
-    async updateMany (query, data) {
+    updateMany (query, data) {
         return this.model.updateMany(query, data);
     }
 
-    async deleteOne (query) {
+    deleteOne (query) {
         return this.model.deleteOne(query);
     }
 
-
-    async deleteMany (query) {
+    deleteMany (query) {
         return this.model.deleteMany(query);
     }
 
-    async count (query = {}) {
+    count (query = {}) {
         return this.model.countDocuments(query);
     }
 
-    async getMany ({ collectionName, search, page, pageSize }) {
-        this.model = mongoose.model(collectionName);
+    async findByCollectionNamePaginated ({
+        startRow = 0,
+        endRow = 100,
+        sortModel = [],
+        filterModel = {},
+        search = '',
+    }) {
+        this.model = mongoose.model(this.model);
 
+        const sortObj = getSortObject(sortModel);
+        const globalSearchFilter = getGlobalSearchFilter(this.model, search);
+        const columnFilters = getColumnFilters(filterModel, mapFilter);
+        const filter = combineFilters(globalSearchFilter, columnFilters);
 
-        let query = {};
+        const mongooseQuery = this.model.find(filter).skip(startRow).limit(endRow - startRow);
 
-        if (search) {
-            const fields = Object.keys(this.model.schema.paths).filter(
-                (path) => this.model.schema.paths[path].instance === 'String'
-            );
-            query = {
-                $or: fields.map((field) => ({
-                    [field]: { $regex: search, $options: 'i' },
-                })),
-            };
+        if (Object.keys(sortObj).length > 0) {
+            mongooseQuery.sort(sortObj);
         }
 
-        const skip = (parseInt(page, 10) - 1) * parseInt(pageSize, 10);
-        const limit = parseInt(pageSize, 10);
-
-        const [total, data] = await Promise.all([
-            this.count(query),
-            this.findAll(query, { skip, limit }),
+        const [rows, totalCount] = await Promise.all([
+            mongooseQuery.exec(),
+            this.model.countDocuments(filter),
         ]);
-        return {
-            data,
-            totalCount: total,
-            page: parseInt(page, 10),
-            pageSize: limit,
-            totalPages: Math.ceil(total / limit),
-        }
+
+        return { rows, lastRow: totalCount, totalCount };
     }
-
 }
-
-

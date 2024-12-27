@@ -11,8 +11,8 @@ export const dataController = {
 
 
         const { collection } = req.params;
-        const { page = 1, pageSize = config.pageSize, search } = req.query;
-        const data = await dataService.getCollectionData({ collectionName: collection, page, pageSize, search })
+        const { startRow, endRow, sortModel, search = '', filterModel = '{}' } = req.query;
+        const data = await dataService.getCollectionData({ collectionName: collection, startRow, endRow, sortModel: JSON.parse(sortModel), filterModel: JSON.parse(filterModel), search })
 
 
         res.json(data);

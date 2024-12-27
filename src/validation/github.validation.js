@@ -26,9 +26,11 @@ export const githubValidation = {
       collection: Joi.string().required().valid(...dataService.getCollections().map(col => col.collectionName)),
     }).unknown(false),
     query: Joi.object({
-      search: Joi.string().optional(),
-      pageSize: Joi.number().optional(),
-      page: Joi.number().optional()
+      startRow: Joi.number().optional().default(0),
+      endRow: Joi.number().optional().default(100),
+      sortModel: Joi.string().optional(),
+      filterModel: Joi.string().optional(),
+      search: Joi.string().allow('').optional()
     }).unknown(false)
   }
 };

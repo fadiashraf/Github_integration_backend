@@ -43,8 +43,8 @@ class DataService {
     }
 
 
-    async getCollectionData ({ collectionName, page = 1, pageSize = config.pageSize, search }) {
-        return new BaseRepository(collectionName).getMany({ collectionName, page, pageSize, search })
+    async getCollectionData ({ collectionName, startRow, endRow, sortModel, filterModel, search }) {
+        return new BaseRepository(collectionName).findByCollectionNamePaginated({ collectionName, startRow, endRow, sortModel, filterModel, search })
     }
 
 }
