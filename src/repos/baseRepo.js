@@ -84,6 +84,6 @@ export class BaseRepository {
             this.model.countDocuments(filter),
         ]);
 
-        return { rows, lastRow: totalCount, totalCount };
+        return { rows, lastRowIndex: totalCount, totalCount };
     }
 }

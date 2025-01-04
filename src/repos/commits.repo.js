@@ -3,7 +3,6 @@ import { BaseRepository } from "./baseRepo.js";
 
 
 
-
 class CommitsRepo extends BaseRepository {
     constructor() {
         super(Commit)
@@ -23,7 +22,8 @@ class CommitsRepo extends BaseRepository {
         )
 
     }
+
 }
 
 
-export const commitsRepo= new CommitsRepo();
+export const commitsRepo = new CommitsRepo();

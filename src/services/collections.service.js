@@ -1,16 +1,13 @@
-import mongoose from 'mongoose';
-import { config } from '../config/env.config.js';
-import { ApiError } from '../helpers/ApiError.js';
-import { asyncHandler } from '../helpers/asyncHandler.js';
 import { Commit } from '../models/commit.model.js';
 import { Issue } from '../models/issue.model.js';
 import { PullRequest } from '../models/pullRequest.model.js';
 import { Repo } from '../models/repository.model.js';
 import { BaseRepository } from '../repos/baseRepo.js';
 import { User } from '../models/user.model.js';
+import { reposRepo } from '../repos/repos.repo.js';
 
 
-class DataService {
+class CollectionsService {
 
     getCollections () {
         return [
@@ -47,6 +44,8 @@ class DataService {
         return new BaseRepository(collectionName).findByCollectionNamePaginated({ collectionName, startRow, endRow, sortModel, filterModel, search })
     }
 
+    
+
 }
 
-export const dataService = new DataService();
+export const collectionsService = new CollectionsService();

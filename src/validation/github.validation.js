@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { dataService } from '../services/data.service.js';
+import { collectionsService } from '../services/collections.service.js';
 
 export const githubValidation = {
   oauthCallback: {
@@ -23,7 +23,7 @@ export const githubValidation = {
 
   getCollectionData: {
     params: Joi.object({
-      collection: Joi.string().required().valid(...dataService.getCollections().map(col => col.collectionName)),
+      collection: Joi.string().required().valid(...collectionsService.getCollections().map(col => col.collectionName)),
     }).unknown(false),
     query: Joi.object({
       startRow: Joi.number().optional().default(0),
@@ -33,4 +33,6 @@ export const githubValidation = {
       search: Joi.string().allow('').optional()
     }).unknown(false)
   }
+
+  
 };

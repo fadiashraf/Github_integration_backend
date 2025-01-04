@@ -1,8 +1,14 @@
 export const getSortObject = (sortModel) => {
-    return sortModel.reduce((acc, { sort, colId }) => {
+
+    if (Object.keys(sortModel).length === 0) {
+        return { createdAt: -1 };
+    }
+    const sortObject = sortModel.reduce((acc, { sort, colId }) => {
         acc[colId] = sort === 'asc' ? 1 : -1;
         return acc;
     }, {});
+
+    return sortObject;
 };
 
 export const getGlobalSearchFilter = (model, search) => {
@@ -36,14 +42,24 @@ export const getColumnFilters = (filterModel, mapFilter) => {
 };
 
 export const combineFilters = (globalSearchFilter, columnFilters) => {
-    if (Object.keys(globalSearchFilter).length > 0) {
-        return { $and: [globalSearchFilter, { $and: columnFilters }] };
-    }
-    return { $and: columnFilters };
-};
+    const combinedFilters = [];
 
+    if (Object.keys(globalSearchFilter).length > 0) {
+        combinedFilters.push(globalSearchFilter);
+    }
+
+    if (Object.keys(columnFilters).length > 0) {
+        combinedFilters.push({ $and: columnFilters });
+    }
+
+    if (combinedFilters.length > 0) {
+        return { $and: combinedFilters };
+    }
+
+    return {}
+};
 export const escapeRegex = (string) => {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return string?.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
 
 export const mapFilter = (key, item) => {

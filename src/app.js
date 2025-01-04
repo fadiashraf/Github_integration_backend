@@ -7,8 +7,6 @@ import rateLimit from 'express-rate-limit';
 import { config } from './config/env.config.js';
 import { morganStream } from './config/logger.config.js';
 import session from 'express-session';
-import { authRoutes } from './routes/auth.routes.js';
-import { githubDataRoutes } from './routes/githubData.router.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
 import { initializeRoutes } from './routes/index.js';
 
@@ -34,7 +32,6 @@ export const createApp = () => {
     app.use(helmet());
     // app.use(rateLimit(config.rateLimit));
 
-    initializeRoutes(app);
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
@@ -45,8 +42,8 @@ export const createApp = () => {
     }
 
     app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
-    app.use(`/api/auth`, authRoutes)
-    app.use(`/api/github`, githubDataRoutes)
+    initializeRoutes(app);
+
     app.use(notFoundHandler)
     app.use(errorHandler)
 
